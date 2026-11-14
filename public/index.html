@@ -13,6 +13,8 @@ body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;backgrou
 header{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
 .wrap{max-width:640px;margin:0 auto;padding:0 16px}
 h1{font-size:20px;margin:0;padding:14px 0 6px}
+.top{display:flex;justify-content:space-between;align-items:center}
+.link{background:none;border:0;color:var(--muted);cursor:pointer;font-size:14px;padding:8px 0}
 .tabs{display:flex;gap:4px}
 .tab{flex:1;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);font-size:15px;font-weight:600;padding:10px 0;cursor:pointer}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
@@ -21,6 +23,8 @@ main{max-width:640px;margin:0 auto;padding:16px}
 .panel.active{display:block}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
 .card h2{font-size:16px;margin:0 0 12px}
+#login{max-width:380px;margin:12vh auto 0;padding:0 16px}
+#login h1{padding:0 0 4px}
 .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
 .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
 .stat span{display:block;font-size:12px;color:var(--muted)}
@@ -45,17 +49,29 @@ details ul{margin:8px 0 0;padding-left:20px}
 .muted{color:var(--muted);font-size:13px}
 .del{background:none;border:0;color:var(--muted);cursor:pointer;font-size:13px}
 .del:hover{color:#dc2626}
-.chart{display:flex;align-items:flex-end;gap:8px;height:170px}
-.col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
-.col .bar{width:100%;background:var(--bar);border-radius:6px 6px 0 0}
-.col .v{font-size:11px;margin-bottom:3px}
-.col small{font-size:11px;color:var(--muted);margin-top:6px;white-space:nowrap}
 .hbar{height:8px;background:var(--bar);border-radius:4px;margin-top:6px}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.81.1"></script>
+<script src="config.js"></script>
 </head>
 <body>
+
+<div id="login" hidden>
+  <div class="card">
+    <h1>Recept</h1>
+    <p class="muted">Sign in to continue</p>
+    <div class="grid">
+      <div class="full"><label>Email<input type="email" id="email" autocomplete="email"></label></div>
+      <div class="full"><label>Password<input type="password" id="password" autocomplete="current-password"></label></div>
+    </div>
+    <button class="primary" id="login-btn">Sign in</button>
+    <p id="login-msg" class="muted"></p>
+  </div>
+</div>
+
+<div id="app" hidden>
 <header><div class="wrap">
-  <h1>Recept</h1>
+  <div class="top"><h1>Recept</h1><button class="link" id="signout">Sign out</button></div>
   <nav class="tabs">
     <button class="tab active" data-tab="scan">Scan</button>
     <button class="tab" data-tab="spending">Spending</button>
@@ -97,6 +113,7 @@ details ul{margin:8px 0 0;padding-left:20px}
     <div class="card"><h2>Offers used</h2><div id="offers"></div></div>
   </section>
 </main>
+</div>
 
 <script>
 const $ = (id) => document.getElementById(id);
@@ -111,6 +128,45 @@ const empty = '<p class="muted">Nothing here yet.</p>';
 let imageBase64 = null;
 let current = null;
 let receipts = [];
+
+/* ---------- login ---------- */
+const cfg = window.RECEPT_CONFIG || {};
+let sb = null;
+try {
+  sb = supabase.createClient(cfg.url, cfg.key);
+} catch (e) {
+  $("login").hidden = false;
+  $("login-msg").textContent = "Setup problem: check public/config.js has your Supabase URL and key.";
+}
+
+function showApp(signedIn) {
+  $("app").hidden = !signedIn;
+  $("login").hidden = signedIn;
+}
+
+if (sb) {
+  sb.auth.onAuthStateChange((event, session) => {
+    if (session) {
+      showApp(true);
+      setTimeout(loadReceipts, 0);
+    } else {
+      receipts = [];
+      showApp(false);
+    }
+  });
+}
+
+async function doLogin() {
+  $("login-msg").textContent = "Signing in...";
+  const { error } = await sb.auth.signInWithPassword({
+    email: $("email").value.trim(),
+    password: $("password").value,
+  });
+  $("login-msg").textContent = error ? error.message : "";
+}
+$("login-btn").onclick = doLogin;
+$("password").addEventListener("keydown", (e) => { if (e.key === "Enter") doLogin(); });
+$("signout").onclick = () => sb.auth.signOut();
 
 /* ---------- tabs ---------- */
 document.querySelectorAll(".tab").forEach((b) => {
@@ -153,9 +209,13 @@ $("scan-btn").onclick = async () => {
   $("status").textContent = "Reading receipt...";
   btn.disabled = true;
   try {
+    const { data: { session } } = await sb.auth.getSession();
     const res = await fetch("/api/scan", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + (session ? session.access_token : ""),
+      },
       body: JSON.stringify({ image: imageBase64 }),
     });
     const data = await res.json();
@@ -208,11 +268,11 @@ $("saveBtn").onclick = async () => {
     offers: current.offers || [],
     items: current.items || [],
   };
-  await fetch("/api/receipts", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(record),
-  });
+  const { error } = await sb.from("receipts").insert(record);
+  if (error) {
+    $("status").textContent = "Could not save: " + error.message;
+    return;
+  }
   $("result-card").hidden = true;
   $("scan-btn").hidden = true;
   $("preview").hidden = true;
@@ -242,10 +302,8 @@ function render() {
   const offers = [];
   list.forEach((r) => (r.offers || []).forEach((o) => offers.push({ o, store: r.store })));
 
-  // scan tab
   $("recent").innerHTML = list.slice(0, 3).map((r) => rowHtml(r, false)).join("") || empty;
 
-  // spending tab
   $("stats-spending").innerHTML =
     stat("Total spent", money(spent), true) +
     stat("This month", money(thisMonth)) +
@@ -265,19 +323,18 @@ function render() {
     const max = Math.max(...keys.map((k) => byMonth[k]), 1);
     const x = (i) => (keys.length === 1 ? W / 2 : L + (i * (W - L - R)) / (keys.length - 1));
     const y = (v) => T + (1 - v / max) * (H - T - B);
-    const pts = keys.map((k, i) => x(i) + "," + y(byMonth[k])).join(" ");
+    const pts2 = keys.map((k, i) => x(i) + "," + y(byMonth[k])).join(" ");
     const grid = [0, 0.5, 1].map((f) => `<line x1="${L}" x2="${W - R}" y1="${y(max * f)}" y2="${y(max * f)}" stroke-width="1" style="stroke:var(--line)"/>`).join("");
     const dots = keys.map((k, i) =>
       `<circle cx="${x(i)}" cy="${y(byMonth[k])}" r="4" style="fill:var(--accent)"/>` +
       `<text x="${x(i)}" y="${y(byMonth[k]) - 10}" text-anchor="middle" font-size="12" style="fill:var(--text)">$${Math.round(byMonth[k])}</text>` +
       `<text x="${x(i)}" y="${H - 8}" text-anchor="middle" font-size="12" style="fill:var(--muted)">${monthLabel(k)}</text>`
     ).join("");
-    $("chart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block">${grid}<polyline points="${pts}" fill="none" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" style="stroke:var(--accent)"/>${dots}</svg>`;
+    $("chart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block">${grid}<polyline points="${pts2}" fill="none" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" style="stroke:var(--accent)"/>${dots}</svg>`;
   }
 
   $("list").innerHTML = list.map((r) => rowHtml(r, true)).join("") || empty;
 
-  // savings tab
   const rate = spent + saved > 0 ? Math.round((saved / (spent + saved)) * 100) + "%" : "0%";
   $("stats-savings").innerHTML =
     stat("Total saved", money(saved), true) +
@@ -315,7 +372,12 @@ function render() {
 }
 
 async function loadReceipts() {
-  receipts = await (await fetch("/api/receipts")).json();
+  const { data, error } = await sb.from("receipts").select("*").order("created_at", { ascending: false });
+  if (error) {
+    $("status").textContent = "Could not load receipts: " + error.message;
+    return;
+  }
+  receipts = data || [];
   render();
 }
 
@@ -323,13 +385,13 @@ document.addEventListener("click", async (e) => {
   const b = e.target.closest("[data-del]");
   if (!b) return;
   if (!confirm("Delete this receipt?")) return;
-  await fetch("/api/receipts/" + b.dataset.del, { method: "DELETE" });
+  const { error } = await sb.from("receipts").delete().eq("id", b.dataset.del);
+  if (error) {
+    alert(error.message);
+    return;
+  }
   loadReceipts();
 });
-
-loadReceipts();
 </script>
 </body>
 </html>
-
-

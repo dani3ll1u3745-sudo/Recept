@@ -1,16 +1,15 @@
 import express from "express";
-import fs from "fs";
 import { GoogleGenAI } from "@google/genai";
+import { createClient } from "@supabase/supabase-js";
 
 const app = express();
 app.use(express.json({ limit: "10mb" }));
 app.use(express.static("public"));
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-const DB = "receipts.json";
-const load = () => (fs.existsSync(DB) ? JSON.parse(fs.readFileSync(DB, "utf8")) : []);
-const save = (list) => fs.writeFileSync(DB, JSON.stringify(list, null, 2));
+const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
 
 const PROMPT = `Read this receipt and return ONLY a JSON object with these fields:
 {
@@ -28,7 +27,28 @@ const PROMPT = `Read this receipt and return ONLY a JSON object with these field
 }
 Use null for anything not printed on the receipt. Do not guess or invent values.`;
 
-app.post("/api/scan", async (req, res) => {
+// Only let signed-in users through
+async function requireUser(req, res, next) {
+  const header = req.headers.authorization || "";
+  const token = header.startsWith("Bearer ") ? header.slice(7) : "";
+  if (!token) return res.status(401).json({ error: "Please sign in." });
+
+  const { data, error } = await supa.auth.getUser(token);
+  if (error || !data.user) return res.status(401).json({ error: "Please sign in again." });
+
+  const allowed = process.env.ALLOWED_EMAIL;
+  if (allowed && (data.user.email || "").toLowerCase() !== allowed.toLowerCase()) {
+    return res.status(403).json({ error: "This account is not allowed." });
+  }
+  req.user = data.user;
+  next();
+}
+
+app.post("/api/scan", requireUser, async (req, res) => {
+  const image = req.body && req.body.image;
+  if (typeof image !== "string" || image.length < 100) {
+    return res.status(400).json({ error: "No image received." });
+  }
   const start = Date.now();
   try {
     const response = await ai.models.generateContent({
@@ -36,7 +56,7 @@ app.post("/api/scan", async (req, res) => {
       contents: [
         {
           parts: [
-            { inlineData: { data: req.body.image, mimeType: "image/jpeg" } },
+            { inlineData: { data: image, mimeType: "image/jpeg" } },
             { text: PROMPT },
           ],
         },
@@ -51,19 +71,5 @@ app.post("/api/scan", async (req, res) => {
   }
 });
 
-app.get("/api/receipts", (req, res) => res.json(load()));
-
-app.post("/api/receipts", (req, res) => {
-  const list = load();
-  const receipt = { ...req.body, id: Date.now().toString() };
-  list.unshift(receipt);
-  save(list);
-  res.json(receipt);
-});
-
-app.delete("/api/receipts/:id", (req, res) => {
-  save(load().filter((r) => r.id !== req.params.id));
-  res.json({ ok: true });
-});
-
-app.listen(3000, () => console.log("Running at http://localhost:3000"));
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log("Running at http://localhost:" + port));

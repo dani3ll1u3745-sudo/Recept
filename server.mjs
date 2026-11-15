@@ -22,10 +22,10 @@ const PROMPT = `Read this receipt and return ONLY a JSON object with these field
   "offers": [strings describing each discount or offer applied],
   "points_earned": number or null,
   "points_balance": number or null,
-  "loyalty_program": string or null,
+  "loyalty_program": "Flybuys" or "Everyday Rewards" or null,
   "items": [{"name": string, "price": number}]
 }
-Use null for anything not printed on the receipt. Do not guess or invent values.`;
+Rules: Use null for anything not printed on the receipt. Do not guess or invent values. Only include in items the purchased products that have a price; ignore promotional text, slogans and description lines that have no price of their own. Set loyalty_program to "Flybuys" only if the receipt clearly shows Flybuys, or to "Everyday Rewards" only if it clearly shows Everyday Rewards (Woolworths); otherwise use null. If loyalty_program is null, points_earned and points_balance must also be null.`;
 
 // Only let signed-in users through
 async function requireUser(req, res, next) {

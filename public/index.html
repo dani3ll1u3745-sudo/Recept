@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Recept</title>
 <link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/png" href="/icon-192.png">
 <meta name="theme-color" content="#202428">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes">
@@ -14,12 +15,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Doto:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-:root{--desk:#202428;--paper:#F1F2EC;--ink:#2A2D31;--faded:#5C6167;--stamp:#3A3FB5;--red:#B3362B;--mono:"Courier Prime","Courier New",ui-monospace,monospace;--num:"Courier Prime","Courier New",ui-monospace,monospace;--num:"Courier Prime","Courier New",ui-monospace,monospace;--dot:"Doto","Courier New",monospace;color-scheme:light}
+:root{--desk:#202428;--paper:#F1F2EC;--ink:#2A2D31;--faded:#5C6167;--stamp:#3A3FB5;--red:#B3362B;--tint:rgba(42,45,49,.09);--mono:"Courier Prime","Courier New",ui-monospace,monospace;--num:"Courier Prime","Courier New",ui-monospace,monospace;--dot:"Doto","Courier New",monospace;color-scheme:light}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--desk);color:var(--ink);font:16px/1.45 var(--mono);padding-bottom:84px}
-button,input{font:inherit;color:inherit}
+button,input,select{font:inherit;color:inherit}
 :focus-visible{outline:3px solid var(--stamp);outline-offset:2px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
@@ -28,7 +29,7 @@ button,input{font:inherit;color:inherit}
 .paper::before,.paper::after{content:"";display:block;height:8px;background-repeat:repeat-x;background-size:16px 8px}
 .paper::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='8' viewBox='0 0 16 8'%3E%3Cpath d='M0 8h16L8 0z' fill='%23F1F2EC'/%3E%3C/svg%3E")}
 .paper::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='8' viewBox='0 0 16 8'%3E%3Cpath d='M0 0h16L8 8z' fill='%23F1F2EC'/%3E%3C/svg%3E")}
-.sheet{background:var(--paper);padding:20px 18px 26px}
+.sheet{background:var(--paper);padding:20px 18px 26px;overflow:hidden}
 
 .brand{font-family:var(--dot);font-weight:900;font-size:40px;line-height:1;letter-spacing:.04em;text-align:center;margin:0}
 .datebar{display:flex;justify-content:space-between;align-items:center;margin:6px 0 4px;color:var(--faded);font-size:14px}
@@ -43,16 +44,19 @@ button,input{font:inherit;color:inherit}
 
 .line{display:flex;align-items:baseline;gap:6px;min-height:30px}
 .line .nm{min-width:0;overflow-wrap:anywhere}
-.line .ld{flex:1;min-width:12px;border-bottom:2px dotted var(--faded);transform:translateY(-4px)}
+.line .ld{flex:1;min-width:20px;border-bottom:2px dotted var(--faded);transform:translateY(-4px)}
 .line .vl{flex:none;font-weight:700}
 .line.total .nm{font-weight:700}
-.line.total .vl,.line.total input.num{font-family:var(--num);font-size:30px;font-weight:700}
-.line.total input.num{width:9ch}
-.line input.num{width:8ch;min-height:44px;text-align:right;border:0;border-bottom:2px dotted var(--ink);border-radius:0;background:transparent;padding:6px 0;font-size:16px;font-weight:700;-moz-appearance:textfield;appearance:textfield}
-.line input.num::-webkit-outer-spin-button,.line input.num::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.line.total .vl{font-family:var(--num);font-size:30px;font-weight:700}
+.line.edit{min-height:48px;padding:6px 0;cursor:text}
+.line.edit input.num{flex:none;width:9ch;border:0;border-radius:0;background:var(--tint);padding:2px 8px;text-align:right;font-family:var(--num);font-size:16px;font-weight:700;line-height:1.3;-webkit-appearance:none;appearance:none;-moz-appearance:textfield}
+.line.edit.total input.num{font-size:28px;width:8ch}
+.line.edit input.num::-webkit-outer-spin-button,.line.edit input.num::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 
-.paper input.name{display:block;width:100%;text-align:center;border:0;border-bottom:2px dotted var(--ink);border-radius:0;background:transparent;font-family:var(--num);font-weight:900;font-size:28px;padding:6px 0}
-.paper input.sub{display:block;width:100%;min-height:44px;text-align:center;border:0;border-bottom:2px dotted var(--faded);border-radius:0;background:transparent;font-size:16px;padding:8px 0;margin-top:4px;-webkit-appearance:none;appearance:none}
+.paper .name{display:block;width:100%;text-align:center;border:0;border-radius:0;background:var(--tint);font-family:var(--num);font-weight:700;font-size:26px;padding:8px}
+.paper .sub{display:block;width:100%;min-height:44px;text-align:center;border:0;border-radius:0;background-color:var(--tint);font-size:16px;padding:8px;margin-top:8px;color:var(--ink)}
+.paper input.sub{-webkit-appearance:none;appearance:none}
+.paper select.sub{text-align-last:center}
 
 .drop{display:block;border:2px dashed var(--ink);padding:22px 12px;text-align:center;cursor:pointer}
 .drop b{display:block;font-size:17px}
@@ -64,22 +68,29 @@ img#preview{display:block;max-width:100%;margin:12px auto 0;border:2px solid var
 .bar:disabled{opacity:.55;cursor:wait}
 #status{margin:10px 0 0;font-size:14px;color:var(--faded)}
 
-.stampwrap{text-align:center;margin:14px 0}
-.stamp{display:inline-block;border:3px double var(--stamp);color:var(--stamp);padding:6px 14px;transform:rotate(-4deg);font-family:var(--num);font-weight:900;font-size:22px;letter-spacing:.04em}
-.stamp.big{font-size:30px;padding:10px 18px}
+.stampwrap{text-align:center;margin:22px 0}
+.stamp{display:inline-block;max-width:calc(100% - 24px);border:3px double var(--stamp);color:var(--stamp);padding:6px 12px;transform:rotate(-3deg);font-family:var(--num);font-weight:700;font-size:20px;letter-spacing:.04em;line-height:1.2}
+.stamp.big{font-size:24px;padding:10px 14px}
 .barcode{height:46px;margin:16px 0 0;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 4px,var(--ink) 4px 5px,transparent 5px 8px,var(--ink) 8px 11px,transparent 11px 13px)}
 
 .entry{padding:2px 0 6px}
 .meta{display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--faded);font-size:14px}
 .void{background:none;border:0;color:var(--red);font-weight:700;text-decoration:underline;min-height:44px;padding:0 4px;cursor:pointer}
 .storebar{margin-bottom:12px}
-.pips{height:6px;background:repeating-linear-gradient(90deg,var(--ink) 0 6px,transparent 6px 9px)}
+.pips{height:6px;background:var(--ink)}
 .coupon{border:2px dashed var(--faded);padding:10px 12px;margin-bottom:10px}
 .coupon .pts{font-family:var(--num);font-weight:700;font-size:30px;line-height:1.1}
 .coupon .pts small{font-family:var(--mono);font-size:14px;font-weight:400;color:var(--faded)}
 .offerline{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px dashed var(--faded)}
 .offerline:last-child{border-bottom:0}
 .offerline span:last-child:not(:first-child){color:var(--faded);flex:none}
+
+.seeall{margin-top:8px}
+.seeall summary{display:flex;justify-content:space-between;align-items:center;min-height:44px;padding:0 12px;border:2px dashed var(--faded);font-weight:700;cursor:pointer;list-style:none}
+.seeall summary::-webkit-details-marker{display:none}
+.seeall summary::after{content:"+";font-size:20px}
+.seeall[open] summary::after{content:"-"}
+.seeall[open] summary{margin-bottom:8px}
 
 .tabs{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:2px dashed var(--faded);z-index:10}
 .tabs-in{max-width:440px;margin:0 auto;display:flex}
@@ -90,7 +101,7 @@ img#preview{display:block;max-width:100%;margin:12px auto 0;border:2px solid var
 #login{padding:10vh 12px 0}
 .field{display:block;margin:16px 0 0}
 .field span{display:block;color:var(--faded);font-size:14px}
-.field input{display:block;width:100%;min-height:44px;border:0;border-bottom:2px dotted var(--ink);border-radius:0;background:transparent;font-size:16px;padding:10px 0}
+.field input{display:block;width:100%;min-height:44px;border:0;border-radius:0;background:var(--tint);font-size:16px;padding:10px 8px;margin-top:4px}
 
 .printing{animation:print 1.1s steps(22,end) backwards}
 @keyframes print{from{clip-path:inset(0 0 100% 0)}to{clip-path:inset(0 0 0 0)}}
@@ -136,7 +147,7 @@ img#preview{display:block;max-width:100%;margin:12px auto 0;border:2px solid var
         <div id="recent"></div>
       </section>
 
-      <section id="spending" class="panel">
+      <section id="spending" class="panel" hidden>
         <div id="spend-top"></div>
         <div class="cut"></div>
         <h2 class="hd">Spending by month</h2>
@@ -146,14 +157,15 @@ img#preview{display:block;max-width:100%;margin:12px auto 0;border:2px solid var
         <div id="list"></div>
       </section>
 
-      <section id="savings" class="panel">
+      <section id="savings" class="panel" hidden>
+        <div id="save-stamp" class="stampwrap" hidden></div>
         <div id="save-top"></div>
         <div class="cut"></div>
         <h2 class="hd">Savings by store</h2>
         <div id="by-store"></div>
         <div class="cut"></div>
         <h2 class="hd">Points</h2>
-        <div id="points"></div>
+        <div id="points-list"></div>
         <div class="cut"></div>
         <h2 class="hd">Offers used</h2>
         <div id="offers"></div>
@@ -174,10 +186,10 @@ const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const money = (n) => "$" + (Number(n) || 0).toLocaleString("en-AU", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const monthKey = (d) => (d && /^\d{4}-\d{2}/.test(d) ? d.slice(0, 7) : "Unknown");
-const monthLabel = (k) => (k === "Unknown" ? k : MONTHS[Number(k.slice(5, 7)) - 1] + " " + k.slice(2, 4));
-const shortMonth = (k, i) => (i === 0 || k.slice(5, 7) === "01" ? monthLabel(k) : MONTHS[Number(k.slice(5, 7)) - 1]);
 const sum = (arr, k) => arr.reduce((a, r) => a + (Number(r[k]) || 0), 0);
 const fmtDate = (d) => (d && /^\d{4}-\d{2}-\d{2}/.test(d) ? Number(d.slice(8, 10)) + " " + MONTHS[Number(d.slice(5, 7)) - 1] + " " + d.slice(0, 4) : "No date");
+const normProgram = (p) => (/fly\s*buys/i.test(p || "") ? "Flybuys" : /everyday\s*reward|woolworths\s*reward/i.test(p || "") ? "Everyday Rewards" : "");
+const hasPrice = (i) => i && i.price !== null && i.price !== "" && Number.isFinite(Number(i.price));
 const line = (name, value, cls) => `<div class="line${cls ? " " + cls : ""}"><span class="nm">${name}</span><i class="ld"></i><span class="vl">${value}</span></div>`;
 const totalLine = (label, value) => `<div class="dbl"></div>` + line(label, value, "total");
 const empty = '<p class="muted">No receipts yet. Photograph one on the Scan tab.</p>';
@@ -186,6 +198,9 @@ const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").match
 let imageBase64 = null;
 let current = null;
 let receipts = [];
+let activeTab = "scan";
+let savedTotal = 0;
+let seeAllOpen = false;
 
 /* ---------- login ---------- */
 const cfg = window.RECEPT_CONFIG || {};
@@ -230,13 +245,32 @@ $("password").addEventListener("keydown", (e) => { if (e.key === "Enter") doLogi
 $("signout").onclick = () => sb.auth.signOut();
 
 /* ---------- tabs ---------- */
+function paintStamp() {
+  const w = $("save-stamp");
+  const show = activeTab === "savings" && savedTotal > 0;
+  w.hidden = !show;
+  w.innerHTML = show ? `<span class="stamp big">YOU SAVED ${money(savedTotal)}</span>` : "";
+}
+
+function setTab(name) {
+  activeTab = name;
+  document.querySelectorAll(".tab").forEach((x) => x.setAttribute("aria-current", x.dataset.tab === name ? "page" : "false"));
+  document.querySelectorAll(".panel").forEach((p) => {
+    const on = p.id === name;
+    p.classList.toggle("active", on);
+    p.hidden = !on;
+  });
+  paintStamp();
+  window.scrollTo(0, 0);
+}
+
 document.querySelectorAll(".tab").forEach((b) => {
-  b.onclick = () => {
-    document.querySelectorAll(".tab").forEach((x) => x.setAttribute("aria-current", x === b ? "page" : "false"));
-    document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === b.dataset.tab));
-    window.scrollTo(0, 0);
-  };
+  b.onclick = () => setTab(b.dataset.tab);
 });
+
+document.addEventListener("toggle", (e) => {
+  if (e.target.classList && e.target.classList.contains("seeall")) seeAllOpen = e.target.open;
+}, true);
 
 /* ---------- scanning ---------- */
 function resizeImage(file, maxSize = 1600) {
@@ -282,10 +316,16 @@ $("scan-btn").onclick = async () => {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
+    data.items = (data.items || []).filter(hasPrice);
+    data.loyalty_program = normProgram(data.loyalty_program) || null;
+    if (!data.loyalty_program) {
+      data.points_earned = null;
+      data.points_balance = null;
+    }
     current = data;
     showResult(data);
     $("result-card").hidden = false;
-    $("status").textContent = "Tap any line to correct it, then save.";
+    $("status").textContent = "Tap any shaded value to correct it, then save.";
     $("result-card").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
   } catch (e) {
     $("status").textContent = e.message;
@@ -295,54 +335,63 @@ $("scan-btn").onclick = async () => {
 
 function numRow(label, id, value, cls) {
   const v = value === null || value === undefined ? "" : value;
-  return `<label class="line${cls ? " " + cls : ""}" for="${id}"><span class="nm">${label}</span><i class="ld"></i><input class="num" type="number" step="any" inputmode="decimal" id="${id}" value="${esc(v)}"></label>`;
+  return `<label class="line edit${cls ? " " + cls : ""}" for="${id}"><span class="nm">${label}</span><i class="ld"></i><input class="num" type="number" step="any" inputmode="decimal" id="${id}" value="${esc(v)}"></label>`;
 }
 
 function showResult(d) {
   const items = d.items || [];
   const offers = d.offers || [];
-  const price = (p) => (p !== null && p !== "" && Number.isFinite(Number(p)) ? Number(p).toFixed(2) : esc(p));
+  const prog = normProgram(d.loyalty_program);
+  const price = (p) => Number(p).toFixed(2);
   $("result").innerHTML =
     `<div class="printing">` +
-    `<input class="name" id="store" value="${esc(d.store)}" placeholder="Store name" aria-label="Store name">` +
-    `<input class="sub" id="program" value="${esc(d.loyalty_program)}" placeholder="Loyalty program" aria-label="Loyalty program">` +
-    `<input class="sub" type="date" id="date" value="${esc(d.date)}" aria-label="Date">` +
+    `<input class="name" id="f-store" value="${esc(d.store)}" placeholder="Store name" aria-label="Store name">` +
+    `<input class="sub" type="date" id="f-date" value="${esc(d.date)}" aria-label="Date">` +
+    `<select class="sub" id="f-program" aria-label="Loyalty program">` +
+    `<option value=""${prog === "" ? " selected" : ""}>No loyalty program</option>` +
+    `<option value="Flybuys"${prog === "Flybuys" ? " selected" : ""}>Flybuys</option>` +
+    `<option value="Everyday Rewards"${prog === "Everyday Rewards" ? " selected" : ""}>Everyday Rewards</option>` +
+    `</select>` +
     `<div class="cut"></div>` +
-    (items.map((i) => line(esc(i.name), price(i.price))).join("") || `<p class="muted center">No items found.</p>`) +
+    (items.map((i) => line(esc(i.name), price(i.price))).join("") || `<p class="muted center">No priced items found.</p>`) +
     `<div class="cut"></div>` +
-    numRow("GST (included)", "gst", d.gst) +
+    numRow("GST (included)", "f-gst", d.gst) +
     `<div class="dbl"></div>` +
-    numRow("TOTAL", "total", d.total, "total") +
+    numRow("TOTAL", "f-total", d.total, "total") +
     `<div class="cut"></div>` +
-    numRow("Savings", "savings", d.total_savings) +
+    numRow("Savings", "f-savings", d.total_savings) +
     `<div class="stampwrap" id="stampwrap" hidden><span class="stamp" id="stamp"></span></div>` +
-    numRow("Points earned", "points", d.points_earned) +
-    numRow("Points balance", "balance", d.points_balance) +
+    `<div id="pointsrows"${prog ? "" : " hidden"}>` +
+    numRow("Points earned", "f-points", d.points_earned) +
+    numRow("Points balance", "f-balance", d.points_balance) +
+    `</div>` +
     `<p class="hd" style="margin-top:12px">Offers applied</p>` +
     (offers.map((o) => `<div class="offerline"><span>${esc(o)}</span></div>`).join("") || `<p class="muted">No offers found.</p>`) +
     `<div class="barcode" aria-hidden="true"></div>` +
     `</div>`;
   const updateStamp = () => {
-    const v = Number($("savings").value) || 0;
+    const v = Number($("f-savings").value) || 0;
     $("stampwrap").hidden = v <= 0;
     $("stamp").textContent = "YOU SAVED " + money(v);
   };
-  $("savings").addEventListener("input", updateStamp);
+  $("f-savings").addEventListener("input", updateStamp);
+  $("f-program").addEventListener("change", () => { $("pointsrows").hidden = !$("f-program").value; });
   updateStamp();
 }
 
 $("saveBtn").onclick = async () => {
   const val = (id) => $(id).value.trim();
   const num = (id) => (val(id) === "" ? null : Number(val(id)));
+  const program = val("f-program") || null;
   const record = {
-    store: val("store"),
-    date: val("date") || null,
-    total: num("total"),
-    gst: num("gst"),
-    total_savings: num("savings"),
-    points_earned: num("points"),
-    points_balance: num("balance"),
-    loyalty_program: val("program") || null,
+    store: val("f-store"),
+    date: val("f-date") || null,
+    total: num("f-total"),
+    gst: num("f-gst"),
+    total_savings: num("f-savings"),
+    points_earned: program ? num("f-points") : null,
+    points_balance: program ? num("f-balance") : null,
+    loyalty_program: program,
     offers: current.offers || [],
     items: current.items || [],
   };
@@ -352,6 +401,7 @@ $("saveBtn").onclick = async () => {
     return;
   }
   $("result-card").hidden = true;
+  $("result").innerHTML = "";
   $("scan-btn").hidden = true;
   $("preview").hidden = true;
   $("file").value = "";
@@ -363,16 +413,13 @@ $("saveBtn").onclick = async () => {
 const entry = (r, del) =>
   `<div class="entry">` +
   line(esc(r.store || "Unknown store"), money(r.total)) +
-  `<div class="meta"><span>${fmtDate(r.date)}` +
-  
-  
-  `</span>${del ? `<button class="void" data-del="${esc(r.id)}">Void</button>` : ""}</div></div>`;
+  `<div class="meta"><span>${fmtDate(r.date)}</span>` +
+  `${del ? `<button class="void" data-del="${esc(r.id)}">Void</button>` : ""}</div></div>`;
 
 function render() {
   const list = receipts;
   const spent = sum(list, "total");
   const saved = sum(list, "total_savings");
-  const pts = sum(list, "points_earned");
   const now = new Date();
   const nowKey = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
   const thisMonth = sum(list.filter((r) => monthKey(r.date) === nowKey), "total");
@@ -427,17 +474,32 @@ function render() {
     $("chart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Line chart of total spending per month" style="display:block">${grid}<polyline points="${path}" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--ink)"/>${marks}</svg>`;
   }
 
-  $("list").innerHTML = list.map((r) => entry(r, true)).join("") || empty;
+  const byDate = [...list].sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.created_at || "").localeCompare(a.created_at || ""));
+  const topFive = byDate.slice(0, 5);
+  const older = byDate.slice(5);
+  $("list").innerHTML = (topFive.map((r) => entry(r, true)).join("") || empty) +
+    (older.length ? `<details class="seeall"${seeAllOpen ? " open" : ""}><summary>See all</summary>${older.map((r) => entry(r, true)).join("")}</details>` : "");
+
+  /* points: only Flybuys and Everyday Rewards count */
+  const progs = {};
+  list.forEach((r) => {
+    const p = normProgram(r.loyalty_program);
+    if (!p) return;
+    if (!progs[p]) progs[p] = { earned: 0, balance: null };
+    progs[p].earned += Number(r.points_earned) || 0;
+    if (progs[p].balance === null && r.points_balance != null) progs[p].balance = r.points_balance;
+  });
+  const ptsTotal = Object.values(progs).reduce((a, p) => a + p.earned, 0);
 
   /* savings tab */
   const rate = spent + saved > 0 ? Math.round((saved / (spent + saved)) * 100) + "%" : "0%";
+  savedTotal = saved;
+  paintStamp();
   $("save-top").innerHTML =
-    (saved > 0
-      ? `<div class="stampwrap"><span class="stamp big">YOU SAVED ${money(saved)}</span></div>`
-      : '<p class="muted">No savings recorded yet.</p>') +
+    (saved > 0 ? "" : '<p class="muted">No savings recorded yet.</p>') +
     line("Savings rate", rate) +
     line("Offers used", offers.length) +
-    line("Points earned", pts.toLocaleString("en-AU"));
+    line("Points earned", ptsTotal.toLocaleString("en-AU"));
 
   const byStore = {};
   list.forEach((r) => {
@@ -450,20 +512,13 @@ function render() {
     `<div class="storebar">${line(esc(e[0]), money(e[1]))}<div class="pips" style="width:${Math.max(4, Math.round((e[1] / smax) * 100))}%"></div></div>`
   ).join("") || '<p class="muted">No savings recorded yet.</p>';
 
-  const progs = {};
-  list.forEach((r) => {
-    const p = r.loyalty_program || "No program";
-    if (!progs[p]) progs[p] = { earned: 0, balance: null };
-    progs[p].earned += Number(r.points_earned) || 0;
-    if (progs[p].balance === null && r.points_balance != null) progs[p].balance = r.points_balance;
-  });
-  $("points").innerHTML = Object.entries(progs)
-    .filter((e) => e[1].earned > 0 || e[1].balance !== null)
-    .map((e) =>
-      `<div class="coupon"><div>${esc(e[0])}</div>` +
-      `<div class="pts">${e[1].earned.toLocaleString("en-AU")} <small>pts earned</small></div>` +
-      (e[1].balance !== null ? `<div class="muted">Latest balance ${esc(e[1].balance)}</div>` : "") +
-      `</div>`).join("") || '<p class="muted">No points recorded yet.</p>';
+  $("points-list").innerHTML = ["Flybuys", "Everyday Rewards"]
+    .filter((p) => progs[p] && (progs[p].earned > 0 || progs[p].balance !== null))
+    .map((p) =>
+      `<div class="coupon"><div>${p}</div>` +
+      `<div class="pts">${progs[p].earned.toLocaleString("en-AU")} <small>pts earned</small></div>` +
+      (progs[p].balance !== null ? `<div class="muted">Latest balance ${esc(progs[p].balance)}</div>` : "") +
+      `</div>`).join("") || '<p class="muted">No Flybuys or Everyday Rewards points recorded yet.</p>';
 
   $("offers").innerHTML = offers.slice(0, 30).map((x) =>
     `<div class="offerline"><span>${esc(x.o)}</span><span>${esc(x.store)}</span></div>`).join("") || '<p class="muted">No offers recorded yet.</p>';
@@ -494,5 +549,3 @@ document.addEventListener("click", async (e) => {
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>
-
-

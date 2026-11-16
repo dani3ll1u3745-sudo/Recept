@@ -13,7 +13,7 @@ const supa = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY, {
 
 const PROMPT = `Read this receipt and return ONLY a JSON object with these fields:
 {
-  "store": string,
+  "store": string (the brand name only, with no branch, suburb, address or store number),
   "date": "YYYY-MM-DD" or null,
   "total": number,
   "currency": string,

@@ -48,6 +48,9 @@ button,input,select{font:inherit;color:inherit}
 .line .vl{flex:none;font-weight:700}
 .line.total .nm{font-weight:700}
 .line.total .vl{font-family:var(--num);font-size:30px;font-weight:700}
+.line2{padding:2px 0}
+.line2 .nm{display:block;overflow-wrap:anywhere}
+.line2 .line{min-height:26px}
 .line.edit{min-height:48px;padding:6px 0;cursor:text}
 .line.edit input.num{flex:none;width:9ch;border:0;border-radius:0;background:var(--tint);padding:2px 8px;text-align:right;font-family:var(--num);font-size:16px;font-weight:700;line-height:1.3;-webkit-appearance:none;appearance:none;-moz-appearance:textfield}
 .line.edit.total input.num{font-size:28px;width:8ch}
@@ -83,7 +86,6 @@ img#preview{display:block;max-width:100%;margin:12px auto 0;border:2px solid var
 .coupon .pts small{font-family:var(--mono);font-size:14px;font-weight:400;color:var(--faded)}
 .offerline{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px dashed var(--faded)}
 .offerline:last-child{border-bottom:0}
-.offerline span:last-child:not(:first-child){color:var(--faded);flex:none}
 
 .seeall{margin-top:8px}
 .seeall summary{display:flex;justify-content:space-between;align-items:center;min-height:44px;padding:0 12px;border:2px dashed var(--faded);font-weight:700;cursor:pointer;list-style:none}
@@ -162,13 +164,11 @@ img#preview{display:block;max-width:100%;margin:12px auto 0;border:2px solid var
         <div id="save-top"></div>
         <div class="cut"></div>
         <h2 class="hd">Savings by store</h2>
+        <p class="muted" style="margin-top:0">Share of your total savings</p>
         <div id="by-store"></div>
         <div class="cut"></div>
         <h2 class="hd">Points</h2>
         <div id="points-list"></div>
-        <div class="cut"></div>
-        <h2 class="hd">Offers used</h2>
-        <div id="offers"></div>
       </section>
     </div></div>
   </main>
@@ -190,7 +190,61 @@ const sum = (arr, k) => arr.reduce((a, r) => a + (Number(r[k]) || 0), 0);
 const fmtDate = (d) => (d && /^\d{4}-\d{2}-\d{2}/.test(d) ? Number(d.slice(8, 10)) + " " + MONTHS[Number(d.slice(5, 7)) - 1] + " " + d.slice(0, 4) : "No date");
 const normProgram = (p) => (/fly\s*buys/i.test(p || "") ? "Flybuys" : /everyday\s*reward|woolworths\s*reward/i.test(p || "") ? "Everyday Rewards" : "");
 const hasPrice = (i) => i && i.price !== null && i.price !== "" && Number.isFinite(Number(i.price));
-const line = (name, value, cls) => `<div class="line${cls ? " " + cls : ""}"><span class="nm">${name}</span><i class="ld"></i><span class="vl">${value}</span></div>`;
+
+/* ---------- store names: group the same store and format consistently ---------- */
+const BRANDS = [
+  [/\bbig\s*w\b/i, "Big W"],
+  [/\bcoles\b/i, "Coles"],
+  [/\bwoolworths\b|\bwoolies\b/i, "Woolworths"],
+  [/\baldi\b/i, "Aldi"],
+  [/\biga\b/i, "IGA"],
+  [/officeworks/i, "Officeworks"],
+  [/chemist\s*warehouse/i, "Chemist Warehouse"],
+  [/priceline/i, "Priceline"],
+  [/\bkmart\b/i, "Kmart"],
+  [/\btarget\b/i, "Target"],
+  [/bunnings/i, "Bunnings"],
+  [/jb\s*hi[\s-]*fi/i, "JB Hi-Fi"],
+  [/dan\s*murphy/i, "Dan Murphy's"],
+  [/\bbws\b/i, "BWS"],
+  [/7[\s-]*eleven/i, "7-Eleven"],
+  [/harris\s*farm/i, "Harris Farm Markets"],
+  [/mcdonald/i, "McDonald's"],
+  [/\bkfc\b/i, "KFC"],
+  [/hungry\s*jack/i, "Hungry Jack's"],
+  [/domino/i, "Domino's"],
+];
+const SMALL_WORDS = new Set(["and", "of", "the", "at", "for", "in", "on", "to"]);
+function titleCase(s) {
+  return s.toLowerCase().split(" ").map((w, i) =>
+    i > 0 && SMALL_WORDS.has(w) ? w : w.replace(/(^|[-\/(])([a-z])/g, (m, a, b) => a + b.toUpperCase())
+  ).join(" ");
+}
+function cleanStore(raw) {
+  const original = String(raw ?? "").trim();
+  if (!original) return "Unknown store";
+  for (const [re, name] of BRANDS) if (re.test(original)) return name;
+  const s = original
+    .replace(/[#*]/g, " ")
+    .replace(/\b(pty|ltd|limited|inc)\b\.?/gi, " ")
+    .replace(/\bp\/l\b/gi, " ")
+    .replace(/\b(stores?|supermarkets?|branch)\b/gi, " ")
+    .replace(/\b(no|nr)\.?\s*\d+\b/gi, " ")
+    .replace(/\b\d+\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return titleCase(s || original);
+}
+const storeName = cleanStore;
+
+/* ---------- receipt lines: long names go on their own line ---------- */
+const line = (name, value, cls) => {
+  const plain = String(name).replace(/&[a-z#0-9]+;/gi, "x");
+  if (!cls && plain.length > 20) {
+    return `<div class="line2"><span class="nm">${name}</span><div class="line"><i class="ld"></i><span class="vl">${value}</span></div></div>`;
+  }
+  return `<div class="line${cls ? " " + cls : ""}"><span class="nm">${name}</span><i class="ld"></i><span class="vl">${value}</span></div>`;
+};
 const totalLine = (label, value) => `<div class="dbl"></div>` + line(label, value, "total");
 const empty = '<p class="muted">No receipts yet. Photograph one on the Scan tab.</p>';
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -316,6 +370,7 @@ $("scan-btn").onclick = async () => {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
+    data.store = cleanStore(data.store);
     data.items = (data.items || []).filter(hasPrice);
     data.loyalty_program = normProgram(data.loyalty_program) || null;
     if (!data.loyalty_program) {
@@ -384,7 +439,7 @@ $("saveBtn").onclick = async () => {
   const num = (id) => (val(id) === "" ? null : Number(val(id)));
   const program = val("f-program") || null;
   const record = {
-    store: val("f-store"),
+    store: cleanStore(val("f-store")),
     date: val("f-date") || null,
     total: num("f-total"),
     gst: num("f-gst"),
@@ -412,7 +467,7 @@ $("saveBtn").onclick = async () => {
 /* ---------- dashboard ---------- */
 const entry = (r, del) =>
   `<div class="entry">` +
-  line(esc(r.store || "Unknown store"), money(r.total)) +
+  line(esc(storeName(r.store)), money(r.total)) +
   `<div class="meta"><span>${fmtDate(r.date)}</span>` +
   `${del ? `<button class="void" data-del="${esc(r.id)}">Void</button>` : ""}</div></div>`;
 
@@ -423,9 +478,6 @@ function render() {
   const now = new Date();
   const nowKey = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
   const thisMonth = sum(list.filter((r) => monthKey(r.date) === nowKey), "total");
-
-  const offers = [];
-  list.forEach((r) => (r.offers || []).forEach((o) => offers.push({ o, store: r.store })));
 
   $("recent").innerHTML = list.slice(0, 3).map((r) => entry(r, false)).join("") || empty;
 
@@ -498,18 +550,18 @@ function render() {
   $("save-top").innerHTML =
     (saved > 0 ? "" : '<p class="muted">No savings recorded yet.</p>') +
     line("Savings rate", rate) +
-    line("Offers used", offers.length) +
     line("Points earned", ptsTotal.toLocaleString("en-AU"));
 
   const byStore = {};
   list.forEach((r) => {
-    const s = r.store || "Unknown store";
+    const s = storeName(r.store);
     byStore[s] = (byStore[s] || 0) + (Number(r.total_savings) || 0);
   });
   const stores = Object.entries(byStore).filter((e) => e[1] > 0).sort((a, b) => b[1] - a[1]);
-  const smax = stores.length ? stores[0][1] : 1;
+  const pct = (v) => (saved > 0 ? (v / saved) * 100 : 0);
+  const pctLabel = (v) => (pct(v) > 0 && pct(v) < 1 ? "&lt;1%" : Math.round(pct(v)) + "%");
   $("by-store").innerHTML = stores.map((e) =>
-    `<div class="storebar">${line(esc(e[0]), money(e[1]))}<div class="pips" style="width:${Math.max(4, Math.round((e[1] / smax) * 100))}%"></div></div>`
+    `<div class="storebar">${line(esc(e[0]), pctLabel(e[1]))}<div class="pips" style="width:${Math.max(3, Math.round(pct(e[1])))}%"></div></div>`
   ).join("") || '<p class="muted">No savings recorded yet.</p>';
 
   $("points-list").innerHTML = ["Flybuys", "Everyday Rewards"]
@@ -519,9 +571,6 @@ function render() {
       `<div class="pts">${progs[p].earned.toLocaleString("en-AU")} <small>pts earned</small></div>` +
       (progs[p].balance !== null ? `<div class="muted">Latest balance ${esc(progs[p].balance)}</div>` : "") +
       `</div>`).join("") || '<p class="muted">No Flybuys or Everyday Rewards points recorded yet.</p>';
-
-  $("offers").innerHTML = offers.slice(0, 30).map((x) =>
-    `<div class="offerline"><span>${esc(x.o)}</span><span>${esc(x.store)}</span></div>`).join("") || '<p class="muted">No offers recorded yet.</p>';
 }
 
 async function loadReceipts() {

@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Doto:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-:root{--desk:#202428;--paper:#F1F2EC;--ink:#2A2D31;--faded:#5C6167;--stamp:#3A3FB5;--red:#B3362B;--tint:rgba(42,45,49,.09);--mono:"Courier Prime","Courier New",ui-monospace,monospace;--num:"Courier Prime","Courier New",ui-monospace,monospace;--dot:"Doto","Courier New",monospace;color-scheme:light}
+:root{--desk:#202428;--paper:#F1F2EC;--ink:#2A2D31;--faded:#5C6167;--stamp:#007A63;--red:#B3362B;--tint:rgba(42,45,49,.09);--mono:"Courier Prime","Courier New",ui-monospace,monospace;--num:"Courier Prime","Courier New",ui-monospace,monospace;--dot:"Doto","Courier New",monospace;color-scheme:light}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
@@ -94,11 +94,11 @@ img#preview{display:block;max-width:100%;margin:12px auto 0;border:2px solid var
 .seeall[open] summary::after{content:"-"}
 .seeall[open] summary{margin-bottom:8px}
 
-.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:2px dashed var(--faded);z-index:10}
+.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:2px solid var(--faded);z-index:10}
 .tabs-in{max-width:440px;margin:0 auto;display:flex}
 .tab{flex:1;min-height:56px;background:none;border:0;border-radius:0;font-weight:700;font-size:16px;cursor:pointer}
-.tab + .tab{border-left:2px dashed var(--faded)}
-.tab[aria-current="page"]{background:var(--stamp);color:var(--paper)}
+.tab + .tab{border-left:2px solid var(--faded)}
+.tab[aria-current="page"]{background:#007A63;color:var(--paper)}
 
 #login{padding:10vh 12px 0}
 .field{display:block;margin:16px 0 0}
@@ -598,3 +598,4 @@ document.addEventListener("click", async (e) => {
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>
+

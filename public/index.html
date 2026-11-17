@@ -31,7 +31,7 @@ button,input,select{font:inherit;color:inherit}
 .paper::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='8' viewBox='0 0 16 8'%3E%3Cpath d='M0 0h16L8 8z' fill='%23F1F2EC'/%3E%3C/svg%3E")}
 .sheet{background:var(--paper);padding:20px 18px 26px;overflow:hidden}
 
-.brand{font-family:var(--dot);font-weight:900;font-size:40px;line-height:1;letter-spacing:.04em;text-align:center;margin:0}
+.brand{color:var(--stamp);font-family:var(--dot);font-weight:900;font-size:40px;line-height:1;letter-spacing:.04em;text-align:center;margin:0}
 .datebar{display:flex;justify-content:space-between;align-items:center;margin:6px 0 4px;color:var(--faded);font-size:14px}
 .link{background:none;border:0;color:var(--faded);text-decoration:underline;min-height:44px;padding:0 4px;cursor:pointer}
 .cut{border-top:2px dashed var(--faded);margin:16px 0}
@@ -61,7 +61,7 @@ button,input,select{font:inherit;color:inherit}
 .paper input.sub{-webkit-appearance:none;appearance:none}
 .paper select.sub{text-align-last:center}
 
-.drop{display:block;border:2px dashed var(--ink);padding:22px 12px;text-align:center;cursor:pointer}
+.drop{display:block;border:4px solid var(--ink);padding:22px 12px;text-align:center;cursor:pointer}
 .drop b{display:block;font-size:17px}
 .drop small{color:var(--faded);font-size:14px}
 .drop:hover{background:rgba(42,45,49,.06)}
@@ -80,7 +80,7 @@ img#preview{display:block;max-width:100%;margin:12px auto 0;border:2px solid var
 .meta{display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--faded);font-size:14px}
 .void{background:none;border:0;color:var(--red);font-weight:700;text-decoration:underline;min-height:44px;padding:0 4px;cursor:pointer}
 .storebar{margin-bottom:12px}
-.pips{height:6px;background:var(--ink)}
+.pips{height:6px;background:var(--stamp)}
 .coupon{border:2px dashed var(--faded);padding:10px 12px;margin-bottom:10px}
 .coupon .pts{font-family:var(--num);font-weight:700;font-size:30px;line-height:1.1}
 .coupon .pts small{font-family:var(--mono);font-size:14px;font-weight:400;color:var(--faded)}
@@ -518,12 +518,12 @@ function render() {
     const marks = shown.map((k, i) => {
       const showVal = vals[i] > 0 && (shown.length <= 7 || i === shown.length - 1 || vals[i] === max);
       const newYear = i === 0 || k.slice(5, 7) === "01";
-      return `<circle cx="${px(i)}" cy="${py(vals[i])}" r="5" style="fill:var(--ink)"/>` +
+      return `<circle cx="${px(i)}" cy="${py(vals[i])}" r="5" style="fill:var(--stamp)"/>` +
         (showVal ? `<text x="${px(i)}" y="${py(vals[i]) - 12}" text-anchor="middle" font-size="14" font-weight="700" style="fill:var(--ink)">$${Math.round(vals[i])}</text>` : "") +
         `<text x="${px(i)}" y="${H - 22}" text-anchor="middle" font-size="14" style="fill:var(--ink)">${MONTHS[Number(k.slice(5, 7)) - 1]}</text>` +
         (newYear ? `<text x="${px(i)}" y="${H - 6}" text-anchor="middle" font-size="12" style="fill:var(--faded)">${k.slice(0, 4)}</text>` : "");
     }).join("");
-    $("chart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Line chart of total spending per month" style="display:block">${grid}<polyline points="${path}" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--ink)"/>${marks}</svg>`;
+    $("chart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Line chart of total spending per month" style="display:block">${grid}<polyline points="${path}" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--stamp)"/>${marks}</svg>`;
   }
 
   const byDate = [...list].sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.created_at || "").localeCompare(a.created_at || ""));
@@ -598,4 +598,5 @@ document.addEventListener("click", async (e) => {
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");</script>
 </body>
 </html>
+
 
